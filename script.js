@@ -1,3 +1,4 @@
+if(!localStorage.getItem("switch")){localStorage.setItem("switch", true)}
 const url = document.location;
 const pathname = url.pathname;
 const urlSearch = url.search;
@@ -39,8 +40,7 @@ const setPointsInMatchPreference = () => {
     document.querySelector(`input[value = "Y"]`).checked=true;
     document.querySelectorAll(`input[name="top20"]`)[1].checked=true;    
     document.querySelector(`input[value="Search"]`).click();
-}
-
+    }
 const openAllMen = () => {
     const tables = document.querySelectorAll("table")[24].children[0];
     if (!!tables){
@@ -48,12 +48,16 @@ const openAllMen = () => {
         for (let i = 1; i<quantity; i++) {
             const rawRef = tables.children[i].children[8].children[0].href.split("'");
             const ref = rawRef[1].split("%");
-            window.open(`http://www.charmdate.com/clagt/admire/${ref[0]}`); 
+            chrome.runtime.sendMessage({method: "getGroup", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`}, function () {
+                if (response.status != null) {
+                    console.log('ответ пришел')
+                }
+            });
+
         }
     } else{
         openAllMen();
     }
-
 }
 
 const switchPage = () => {
@@ -94,15 +98,18 @@ const changeTypeOfLetter = () => {
 }
 
 const checkSentMail = (search10) => {
-        let check = 0;
-        for(let i = 1; i < 8; i++){
-            if(search10.children[i].innerHTML == "10"){check++;}
-        }
-        if(check < 4){ 
-            window.close() 
-        } else { 
-            changeTypeOfLetter()
-        }
+    let check = 0;
+    let check10 = 0;
+    // points started frow 2 column. 
+    if(search10.children[1].innerHTML === "-" || +search10.children[1].innerHTML <=10){check++};
+    if(search10.children[1].innerHTML === "10"){check10++};
+    for(let i = 2; i < 8; i++){
+        if(+search10.children[i].innerHTML == 10){check10++};
+        if(+search10.children[i].innerHTML <= 10){check++};
+    }
+    if(check===7 && check10>3){
+        changeTypeOfLetter();
+    } else {window.close()}
 }
 
 const sendAdmire = () => {   
@@ -128,7 +135,7 @@ switch(pathname){
 
     case "/clagt/admire/search_matches3.php" :
         openAllMen();
-        delay(30000).then(() => switchPage());
+        delay(7000).then(() => switchPage());
         break;
 
     case "/clagt/admire/adr_succ2.php":
@@ -144,8 +151,3 @@ if(!!sendButton){
         checkSentMail(search10);
     }
 }
-
-
-
-
-
