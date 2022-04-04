@@ -1,17 +1,12 @@
-const btn = document.getElementsByClassName("switch-btn")[0]
+const btn = document.getElementById("btn");
+let lsD = true;
 
-if(localStorage.getItem("switch") == "true"){btn.classList.add("switch-on")}
+const stor = chrome.storage.sync
 
-const sw = () => {
-    if(document.getElementsByClassName("switch-on")[0]){
-        btn.classList.remove("switch-on")
-    } else {
-        btn.classList.add("switch-on")
-    }
-    chrome.runtime.sendMessage({method: "switch"})
+btn.onclick = () => {
+    stor.get("switch").then(v=>{lsD=v===false?true:false});
+    stor.set({switch:lsD});
 }
-
-btn.addEventListener("click", sw)
 
 
 
