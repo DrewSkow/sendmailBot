@@ -1,5 +1,11 @@
-
-chrome.storage.sync.get("switch").then(v=>v.switch).then(v=>v===true?script():false)
+ if(+localStorage.getItem("sended") >= 50){
+    chrome.runtime.sendMessage({method: "closeTabs"}, ()=>{
+        localStorage.clear();
+        window.location.href="/clagt/woman/women_profiles_allow_edit.php";
+    });    
+} else{
+    chrome.storage.sync.get("switch").then(v=>v.switch).then(v=>v===true?script():false)
+}
 
 const script = () => {
     const url = document.location;
@@ -10,26 +16,22 @@ const script = () => {
     const regexId = /=\w{5,7}-\w{1,5}/;
     const sendButton = document.querySelector("input[name='sendmailsub']");
 
-    if(+localStorage.getItem("sended") >= 50){
-        confirm("50 запросов были отправлены")? localStorage.clear(): alert("50 запросов были отправлены, пожалуйста отключите это расширение или смените анкету!");
-    }   
-
     const delay = async (ms) => await new Promise(resolve => setTimeout(resolve, ms));
 
     const closeOnMaxOrError = () => {
         const p = document.querySelector("p");
-        if(!!p? p.innerText.indexOf("to maximum quantity")>-1 : false){
+        if(!!p? p.innerText.indexOf("to maximum quantity")>-1 : false){ 
             localStorage.setItem("sended", "50");
-        }
-        window.close();
+        } else {window.close()}
+        
     }
 
     const insertGirlId = () => {
         let girlId = prompt("Введите ID девушки");
         if(!!localStorage.sended){
-            confirm("Хотите ли вы начать поиск заново?") && localStorage.clear();
+            confirm("Начать поиск сначала?") && localStorage.clear();
         }
-        let sended = prompt("введите количество отправленных заявок или 0");
+        let sended = prompt("Введите количество отправленных заявок") || 0;
         localStorage.setItem("sended", sended);
         document.location.href = `http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${girlId}&Submit=Continue+%3E%3E`;
     }
@@ -43,20 +45,17 @@ const script = () => {
         document.querySelector(`input[value = "Y"]`).checked=true;
         document.querySelectorAll(`input[name="top20"]`)[1].checked=true;    
         document.querySelector(`input[value="Search"]`).click();
-        }
+    }
+
     const openAllMen = () => {
+        chrome.runtime.sendMessage({method: "clearArray"});
         const tables = document.querySelectorAll("table")[24].children[0];
         if (!!tables){
             const quantity = tables.children.length;
             for (let i = 1; i<quantity; i++) {
                 const rawRef = tables.children[i].children[8].children[0].href.split("'");
                 const ref = rawRef[1].split("%");
-                chrome.runtime.sendMessage({method: "getGroup", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`}, function () {
-                    if (response.status != null) {
-                        console.log('ответ пришел')
-                    }
-                });
-
+                chrome.runtime.sendMessage({method: "openTab", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`});
             }
         } else{
             openAllMen();
@@ -138,7 +137,7 @@ const script = () => {
 
         case "/clagt/admire/search_matches3.php" :
             openAllMen();
-            delay(7000).then(() => switchPage());
+            delay(30000).then(() => switchPage());
             break;
 
         case "/clagt/admire/adr_succ2.php":
