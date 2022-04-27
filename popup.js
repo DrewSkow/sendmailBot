@@ -1,26 +1,25 @@
-// const btn = document.getElementById("btn");
-// const stor = chrome.storage.sync;
+const switcher = document.getElementById("switchButton");
+chrome.storage.local.get("switcher", d => switcher.checked = d.switcher);
+switcher.addEventListener('click', e => chrome.storage.local.set({switcher: e.target.checked}));
 
-// const setState = (v) => {
-//     if (v==true){
-//         btn.children[0].checked=true;
-//     } else {btn.children[0].checked=false}
-// }
+const wrapper = document.querySelector(".wrapper");
+wrapper.addEventListener("input", (e) => {
+    chrome.storage.local.set({[e.target.id]:e.target.value})
+})
 
+const turbo = document.getElementById("turboButton");
+turbo.addEventListener('click', e => chrome.storage.local.set({turbo: e.target.value}));
+chrome.storage.local.get("turbo", d => turbo.checked = d.turbo);
 
-// stor.get("switch", v => setState(v.switch));
-
-// const switcher = (v) => {
-//     if(v==undefined){
-//         stor.set({switch:true});
-//     } else if (v==true){
-//         stor.set({switch:false});
-//     } else if (v==false) {stor.set({switch:true});}
-// }
-
-// btn.onclick = () => {
-//     stor.get("switch", v => switcher(v?.switch))
-// }
-
+const sendButton = document.getElementById("sendButton");
+sendButton.addEventListener('click', e => {
+    const data = {};
+    const inputArray = document.querySelectorAll("input");
+    inputArray.forEach(item => {
+        if(item.id == "switchButton" || item.id == "turboButton"){data[item.id] = item.checked;}
+        else {data[item.id]= item.value;}
+    })
+    chrome.runtime.sendMessage({method: "sendData", data})
+}) 
 
 
