@@ -2,34 +2,96 @@
 <!DOCTYPE html>
 <html lang="ru">
 <head>
-    <link rel="stylesheet" href="style.css">
+  <meta charset="UTF-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="popup.css">
 </head>
 <body>
-    <div class="power-switch" id="btn">
-        <input type="checkbox" />
-        <div class="button">
-          <svg class="power-off">
-            <use xlink:href="#line" class="line" />
-            <use xlink:href="#circle" class="circle" />
-          </svg>
-          <svg class="power-on">
-            <use xlink:href="#line" class="line" />
-            <use xlink:href="#circle" class="circle" />
-          </svg>
+
+  <div class="wrapper">
+    <div class="header_field">
+      <div class="title">
+          Отправка Эдмаеров
+      </div>
+      <div class="switcher_field">
+          <div class="title_notice">
+            Включение
+          </div>
+          <div class="switcher_wrapper">
+            <label class="switch">
+              <input id="switchButton" type="checkbox">
+              <span class="slider round"></span>
+            </label>
+          </div>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="lady_field">
+        <p class="label">ID Девушки</p>
+        <input type="text" id="w_id_i" placeholder="Введите ID девушки">
+      </div>
+
+      <div class="turbo_field">
+        <p class="label">
+          Турборежим
+        </p>
+        <div class="">
+          <div class="switcher_wrapper">
+            <label class="switch">
+              <input id="switchButton" type="checkbox">
+              <span class="slider round"></span>
+            </label>
+          </div>
+          <p class="notice">Убирается задержка при открытии вкладок. Для более мощных ПК</p>
         </div>
       </div>
+    </div>
+
+    <div class="row">
+      <div class="days_points">
+        <p class="label">
+          Количество уже отправленных сообщений за 7 дней для каждого дня
+        </p>
+        <div class="days_fields">
+          <input type="text" placeholder="0">
+          <input type="text" placeholder="0">
+          <input type="text" placeholder="0">
+          <input type="text" placeholder="0">
+          <input type="text" placeholder="0">
+          <input type="text" placeholder="0">
+          <input type="text" placeholder="0">
+        </div>
+        <p class="notice">Введите промежуток значений в каждое поле (день). Напирмер, 1–10 или 21</p>
+      </div>
+    </div>
+
+    <div class="row">
+      <div class="common_field">
+        <p class="label">
+          Общее количество отправленных сообщений за 7 дней
+        </p>
+        <input type="text" id="common_input" placeholder="0">
+      </div>
+      <div class="edmire_field">
+        <p class="label">
+          Ключевая фразу вашего эдмаера или его номер в списке
+        </p>
+        <input type="text" id="edmire_input" placeholder="1–3 или 1,5,6">
+      </div>
+    </div>
+
+    <div class="sendDataButton">
+      Начать рассылку
+    </div>
+  </div>
+
       
-      <!-- SVG -->
-      <svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
-        <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" id="line">
-          <line x1="75" y1="34" x2="75" y2="58"/>
-        </symbol>
-        <symbol xmlns="http://www.w3.org/2000/svg" viewBox="0 0 150 150" id="circle">
-          <circle cx="75" cy="80" r="35"/>
-        </symbol>
-      </svg>
-      
-    <script src="js.js"></script>
+    <script src="popup.js"></script>
 </body>
 </html>
                         

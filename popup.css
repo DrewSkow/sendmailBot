@@ -1,0 +1,260 @@
+/* common styles */
+body{
+    width: 590px;
+    font-family: 'Montserrat', sans-serif;
+    font-style: normal;
+    padding: 0;
+    margin: 0;
+}
+
+p{
+    padding: 0;
+    margin: 0;
+}
+
+.wrapper{
+    position: relative;
+
+    padding: 60px 20px 0 20px;
+    
+    max-width: 590px;
+    width: 550px;
+}
+
+.label{
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+}
+
+.notice{
+    font-weight: 400;
+    font-size: 12px;
+    line-height: 130%;
+    letter-spacing: 0.03em;
+    color: #737189;
+    width: 100%;
+}
+
+input{
+    margin-top: 10px;
+    padding: 10px;
+    background: #FFFFFF;
+    box-shadow: 0px 1px 2px rgba(51, 58, 222, 0.2), 0px 4px 6px rgba(74, 0, 224, 0.06);
+    border-radius: 5px;
+    border: none;
+    cursor: pointer;
+}
+
+input::placeholder{
+
+    font-family: 'Montserrat', sans-serif;
+    font-style: normal;
+
+    letter-spacing: 0.03em;
+    color: #737189;
+}
+
+input:focus{
+    outline: 1px solid rgba(51, 58, 222, 0.3);
+}
+
+.row{
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    column-gap: 30px;
+
+    margin-top: 30px;
+}
+
+
+/* header part */ 
+.header_field{
+    position: absolute;
+    top:0;
+    left: 0;
+    right: 0;
+    padding: 16px 20px;
+
+    background: #F5F5FD;
+
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.title{
+    font-weight: 600;
+    font-size: 20px;
+    line-height: 24px;
+}
+
+.switcher_field{
+    display:flex;
+    justify-content: end;
+    align-items: center;
+
+    column-gap: 10px;
+}
+
+.title_notice{
+    font-weight: 400;
+    font-size: 14px;
+    line-height: 130%;
+}
+
+/* first line */
+
+.lady_field input{
+    width: 200px;
+    height: 18px;
+}
+
+.turbo_field{
+    display: flex;
+    flex-direction: column;
+    row-gap: 13px;
+}
+
+
+.turbo_field div{
+    display: flex; 
+    align-items: center;
+    column-gap: 10px;
+}
+
+/* second line */
+.days_points input{
+    width: 50px;
+    height: 18px;
+    margin-bottom: 10px;
+}
+
+.days_points input::placeholder{
+    text-align: center;
+    
+}
+
+.days_fields{
+    width: 550px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+
+/* third line */
+.common_field, .edmire_field{
+    text-align: center;
+}
+
+.common_field input{
+    width: 80px;
+}
+
+.edmire_field input{
+    width: 150px;
+}
+
+.common_field input::placeholder, .edmire_field input::placeholder{
+    text-align: center;
+}
+
+.sendDataButton{
+    width: 220px;
+    margin: 0 auto;
+    height: 37px;
+    border:none;
+    background: #333ADE;
+    border-radius: 5px;
+
+    display: flex;
+    justify-content: center;
+    align-items: center;
+
+    margin-top: 30px;
+    margin-bottom: 40px;
+
+    font-weight: 600;
+    font-size: 14px;
+    line-height: 17px;
+    text-align: center;
+    
+    color: #FFFFFF;
+
+    cursor: pointer;
+}
+
+.sendDataButton:hover{
+    background: rgba(51, 58, 222, 0.9);
+}
+
+.sendDataButton:active{
+    background: rgba(51, 58, 222, 0.7);
+}
+
+
+/* switch button ========================== */
+
+
+.switch {
+    margin-left: 10px;
+    position: relative;
+    display: inline-block;
+    width: 45px;
+    height: 25px;
+}
+
+.switch input { 
+    opacity: 0;
+    width: 0;
+    height: 0;
+}
+
+.slider {
+    position: absolute;
+    cursor: pointer;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: #ccc;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+.slider:before {
+    position: absolute;
+    content: "";
+    height: 19px;
+    width: 19px;
+    left: 2.3px;
+    bottom: 3px;
+    background-color: white;
+    -webkit-transition: .4s;
+    transition: .4s;
+}
+
+input:checked + .slider {
+    background-color: #333ADE;
+}
+
+input:focus + .slider {
+    box-shadow: 0 0 1px #333ADE;
+}
+
+input:checked + .slider:before {
+    -webkit-transform: translateX(21px);
+    -ms-transform: translateX(21px);
+    transform: translateX(21px);
+}
+
+/* Закругленные ползунки */
+.slider.round {
+    border-radius: 34px;
+}
+
+.slider.round:before {
+    border-radius: 50%;
+}

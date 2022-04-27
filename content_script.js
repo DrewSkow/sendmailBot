@@ -7,7 +7,7 @@ if(+localStorage.getItem("sended") >= 50 && document.location.pathname=="/clagt/
             localStorage.clear();
         });
     });
-} else{
+} else {
     chrome.storage.sync.get("switch").then(v=>v.switch).then(v=>v===true?script():false);
 }
 
@@ -24,8 +24,7 @@ const script = () => {
         const p = document.querySelector("p");
         if(!!p? p.innerText.indexOf("to maximum quantity")>-1 : false){ 
             localStorage.setItem("sended", "50");
-        } else {chrome.runtime.sendMessage({method:"closeTab"});}
-        
+        } else {chrome.runtime.sendMessage({method:"closeTab"});}    
     }
 
     const insertGirlId = () => {
@@ -83,7 +82,6 @@ const script = () => {
                 nextButton.click();
             }
         }
-  
     }
 
     function getRandomInRange(min, max) {
@@ -108,7 +106,6 @@ const script = () => {
 
     const checkSentMail = (search10) => {
         let check = 0;
-        // points started frow 2 column. 
         if(search10.children[1].innerHTML === "-" || +search10.children[1].innerHTML <=15){check++};
         for(let i = 2; i < 8; i++){
             if(+search10.children[i].innerHTML >= 10 && +search10.children[i].innerHTML <=15){check++};
