@@ -1,17 +1,39 @@
 const delay = async (ms) => await new Promise(resolve => setTimeout(resolve, ms));
+const port = chrome.runtime.connect({name: "contentChannel"});
+let data;
 
-if(+localStorage.getItem("sended") >= 50 && document.location.pathname=="/clagt/woman/women_profiles_allow_edit.php"){
-    delay(10000).then(()=>{
-        chrome.runtime.sendMessage({method: "closeTabs"}, ()=>{
-            window.location.href="/clagt/woman/women_profiles_allow_edit.php";
-            localStorage.clear();
-        });
-    });
-} else {
-    chrome.storage.sync.get("switch").then(v=>v.switch).then(v=>v===true?script():false);
+chrome.storage.local.get(console.log);
+
+if(document.location == "http://www.charmdate.com/clagt/admire/adr_error.php" || document.location =="https://www.charmdate.com/clagt/admire/adr_error.php"){
+    port.postMessage({method: "closeTab"});
+} else if (document.location.pathname ==  '/clagt/admire/adr_succ2.php'){
+    port.postMessage({method: "closeTab"});
 }
 
+port.onMessage.addListener(msg => {
+
+})
+
+
+chrome.storage.local.get("data", v => data = v.data)
+
+
+chrome.storage.local.get("sended", v => {
+    if(v.sended ){
+        delay(5000).then(()=>{
+            port.postMessage({method: "closeTabs"}, ()=>{
+                localStorage.clear();
+                alert("Все заявки были отправлены");
+            });
+        });
+    }else {
+        chrome.storage.local.get("switcher", v => v.switcher? script(): false);
+    }
+})
+
+
 const script = () => {
+
     const url = document.location;
     const pathname = url.pathname;
     const urlSearch = url.search;
@@ -22,19 +44,13 @@ const script = () => {
 
     const closeOnMaxOrError = () => {
         const p = document.querySelector("p");
-        if(!!p? p.innerText.indexOf("to maximum quantity")>-1 : false){ 
-            localStorage.setItem("sended", "50");
-        } else {chrome.runtime.sendMessage({method:"closeTab"});}    
+        if(!!p && p.innerText.indexOf("to maximum quantity")>-1){ 
+            chrome.storage.local.set({sended: true});
+        }  else {chrome.runtime.sendMessage({method:"closeTab"});}
     }
-
+ 
     const insertGirlId = () => {
-        let girlId = prompt("Введите ID девушки");
-        if(!!localStorage.sended){
-            confirm("Начать поиск сначала?") && localStorage.clear();
-        }
-        let sended = prompt("Введите количество отправленных заявок") || 0;
-        localStorage.setItem("sended", sended);
-        document.location.href = `http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${girlId}&Submit=Continue+%3E%3E`;
+        document.location.href = `http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${data.wId}&Submit=Continue+%3E%3E`;
     }
 
     const setPointsInMatchPreference = () => { 
@@ -49,38 +65,47 @@ const script = () => {
     }
 
     const openAllMen = () => {
-        chrome.runtime.sendMessage({method: "clearArray"});
         const tables = document.querySelectorAll("table")[24].children[0];
         if (!!tables){
             const quantity = tables.children.length;
-            for (let i = 1; i<quantity; i++) {
-                const rawRef = tables.children[i].children[8].children[0].href.split("'");
-                const ref = rawRef[1].split("%");
-                chrome.runtime.sendMessage({method: "openTab", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`});
-            }
+            chrome.storage.local.get("turbo", data => {
+                if(data.turbo){
+                    for (let i = 1; i<quantity; i++) {
+                        const rawRef = tables.children[i].children[8].children[0].href.split("'");
+                        const ref = rawRef[1].split("%");
+                        port.postMessage({method: "openTab", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`});
+                    }
+                } else {
+                    let i = 1;
+                    let loop = setInterval(() => {
+                        chrome.storage.local.get("sended", v => v.sended? window.reload() : false)
+                        const rawRef = tables.children[i].children[8].children[0].href.split("'");
+                        const ref = rawRef[1].split("%");
+                        port.postMessage({method: "openTab", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`});
+                        if(i===quantity-1){clearInterval(loop)}
+                        i++;
+                    }, 1000);
+                }
+            })
         } else{
             openAllMen();
         }
     }
 
     const switchPage = () => {
-        if(+localStorage.getItem("sended") >= 50){
-            window.location.href="/clagt/woman/women_profiles_allow_edit.php";
-        } else {
-            const nextButton = document.querySelectorAll("table")[25].children[0].children[0].children[1].children[3];
-            const firstButton = document.querySelectorAll("table")[25].children[0].children[0].children[1].children[1];
-            if(!nextButton.children[0]){
-                localStorage.setItem("ended", "true");
-            };
-            if(!!localStorage.getItem("ended")) {
-                if(!!firstButton.children[0]){
-                    firstButton.click();
-                } else{
-                    document.location.reload();
-                }
-            } else {
-                nextButton.click();
+        const nextButton = document.querySelectorAll("table")[25].children[0].children[0].children[1].children[3];
+        const firstButton = document.querySelectorAll("table")[25].children[0].children[0].children[1].children[1];
+        if(!nextButton.children[0]){
+            localStorage.setItem("ended", "true");
+        };
+        if(!!localStorage.getItem("ended")) {
+            if(!!firstButton.children[0]){
+                firstButton.click();
+            } else{
+                document.location.reload();
             }
+        } else {
+            nextButton.click();
         }
     }
 
@@ -88,37 +113,104 @@ const script = () => {
         return Math.floor(Math.random() * (max - min + 1)) + min;
         }
 
-    const changeTypeOfLetter = () => {
-        const messTamplates = document.getElementsByClassName("mobanva")[0]
-        if(!!messTamplates){
-            const quantity = messTamplates.children.length
-            const randomChildren =  messTamplates.children[getRandomInRange(2, quantity)];
-            if(!!randomChildren){
-                randomChildren.children[0].click();
-            } else {
-                changeTypeOfLetter();
-            }
-        } else {
-            changeTypeOfLetter();
-        }
-
+    const getRandomInArr = (q) => {
+        return Math.floor(Math.random() * q);
     }
 
-    const checkSentMail = (search10) => {
-        let check = 0;
-        if(search10.children[1].innerHTML === "-" || +search10.children[1].innerHTML <=15){check++};
-        for(let i = 2; i < 8; i++){
-            if(+search10.children[i].innerHTML >= 10 && +search10.children[i].innerHTML <=15){check++};
+    const changeTypeOfLetter = async () => {
+
+        const messTamplates = document.getElementsByClassName("mobanva")[0];
+
+        let quantity = messTamplates.children.length
+
+        let randomChildren;
+
+        if(!!messTamplates) {
+            if(typeof data.admire == "string"){
+                for(let i = 2; i < quantity; i++){
+                    if (document.getElementsByClassName("mobanva")[0].children[i].children[2].innerHTML == data.admire){
+                     randomChildren = document.getElementsByClassName("mobanva")[0].children[i];
+                    }
+                 }
+            } else if(Array.isArray(data.admire)) {
+                if(data.admire[data.admire.length-1] == ","){
+                    randomChildren = messTamplates.children[data.admire[getRandomInArr[data.admire.length-1]]];
+                }
+                randomChildren = messTamplates.children[getRandomInRange(data.admire[0]+1, data.admire[1]+1)];
+            }  else if(data.admire != 0){
+                    randomChildren = messTamplates.children[data.admire+1];
+            } else {
+                    randomChildren =  messTamplates.children[getRandomInRange(2, quantity)];
+                }
+            randomChildren.children[0].click();
+        
         }
+    }
+
+    const checkSentMail = async (search10) => {
+        let check = 0;
+        await chrome.storage.local.get("data", v => data = v.data);
+
+        await chrome.storage.local.get("data", v => console.log(v.data));
+
+        if(data.points.length > 2){
+            if(Array.isArray(data.points[0])){
+                if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0][0] && +search10.children[1].innerHTML <= data.points[0][1])) {
+                    check++;
+                }
+            } else if(data.points[0]==-1){
+                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML >= 0){
+                    check++
+                }
+            } else {
+                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points[0]){
+                    check++
+                }
+            }
+
+            for(let i = 1; i<7; i++){
+                if(Array.isArray(data.points[i])){
+                    if(+search10.children[i+1].innerHTML >= data.points[i][0] && +search10.children[i+1].innerHTML <= data.points[i][1]) {
+                        check++;
+                    }
+                } else if(data.points[i]==-1){
+                    if(+search10.children[i+1].innerHTML >= 0){
+                        check++
+                    }
+                } else {
+                    if(+search10.children[i+1].innerHTML <= data.points[i]){
+                        check++
+                    }
+                }
+            }
+        } else if(data.points.length == 2){
+            if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1])) {
+                check++;
+            } 
+            for(let i = 1; i<7; i++){
+                if(+search10.children[i+1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1]) {
+                    check++;
+                }  
+            }
+        } else{
+            if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points){
+                check++
+            }
+
+            for(let i = 1; i<7; i++){
+                if(+search10.children[1].innerHTML <= data.points){
+                    check++
+                }
+            }
+        }
+        console.log(check);
         if(check===7){
             changeTypeOfLetter();
-        } else {chrome.runtime.sendMessage({method:"closeTab"})}
+        } else {port.postMessage({method:"closeTab"})}
     }
 
     const sendAdmire = () => {   
         document.querySelectorAll("input[name='sendmailsub']")[0].click();
-        const sent = +localStorage.getItem("sended");
-        localStorage.setItem("sended",sent+1);
     }
 
     switch(pathname){
@@ -137,14 +229,15 @@ const script = () => {
             break;
 
         case "/clagt/admire/search_matches3.php" :
-            openAllMen();
-            delay(7000).then(() => switchPage());
-            break;
-
-        case "/clagt/admire/adr_succ2.php": {
-            chrome.runtime.sendMessage({method:"closeTab"});
-            break;
-        }
+            chrome.storage.local.get("sended", v => {
+                if(v.sended) {
+                    chrome.storage.local.set({switcher: false});
+                    port.postMessage({method: "closeTabs"})
+                } else {
+                    openAllMen();
+                    delay(data.turbo?10000:25000).then(() => switchPage());
+                }
+            })
     }
 
     if(!!sendButton){

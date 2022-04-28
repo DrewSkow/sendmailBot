@@ -95,8 +95,6 @@ input:focus{
     display:flex;
     justify-content: end;
     align-items: center;
-
-    column-gap: 10px;
 }
 
 .title_notice{
@@ -130,6 +128,7 @@ input:focus{
     width: 50px;
     height: 18px;
     margin-bottom: 10px;
+    text-align: center;
 }
 
 .days_points input::placeholder{
@@ -145,19 +144,21 @@ input:focus{
 }
 
 /* third line */
-.common_field, .edmire_field{
+.common_field, .admire_field{
     text-align: center;
 }
 
 .common_field input{
     width: 80px;
+    text-align: center;
 }
 
-.edmire_field input{
+.admire_field input{
     width: 150px;
+    text-align: center;
 }
 
-.common_field input::placeholder, .edmire_field input::placeholder{
+.common_field input::placeholder, .admire_field input::placeholder{
     text-align: center;
 }
 
