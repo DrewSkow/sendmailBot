@@ -1,36 +1,38 @@
-const delay = async (ms) => await new Promise(resolve => setTimeout(resolve, ms));
+const locationsErr = [
+    "http://www.charmdate.com/clagt/admire/adr_error.php",
+    "https://www.charmdate.com/clagt/admire/adr_error.php",
+
+];
+
 const port = chrome.runtime.connect({name: "contentChannel"});
 let data;
 
-chrome.storage.local.get(console.log);
+chrome.storage.local.get("switcher", v => {
+    if(v.switcher){
+        locationsErr.forEach(item => {
+            if(document.location.href == item) {
+                console.log("aaaaaaa")
 
-if(document.location == "http://www.charmdate.com/clagt/admire/adr_error.php" || document.location =="https://www.charmdate.com/clagt/admire/adr_error.php"){
-    port.postMessage({method: "closeTab"});
-} else if (document.location.pathname ==  '/clagt/admire/adr_succ2.php'){
-    port.postMessage({method: "closeTab"});
-}
-
-port.onMessage.addListener(msg => {
-
-})
-
-
-chrome.storage.local.get("data", v => data = v.data)
-
-
-chrome.storage.local.get("sended", v => {
-    if(v.sended ){
-        delay(5000).then(()=>{
-            port.postMessage({method: "closeTabs"}, ()=>{
-                localStorage.clear();
-                alert("Все заявки были отправлены");
-            });
+                const p = document.querySelector("p");
+                if(!!p && p.innerText.indexOf("to maximum quantity") > -1){ 
+                    chrome.storage.local.set({allMessagesSended: true})
+                    port.postMessage({method: "closeTabs"})
+                }  else {
+                    port.postMessage({method:"closeTab"});}
+            }
         });
-    }else {
-        chrome.storage.local.get("switcher", v => v.switcher? script(): false);
+        
+        chrome.storage.local.get("end", v => v.end && alert("вам конец"))
+        
+        chrome.storage.local.get(console.log);
+        
+        chrome.storage.local.get("data", v => data = v.data);
+
+        document.getElementsByTagName("h3")[0]?.innerHTML.indexOf("submitted successfully") > 0 && port.postMessage({method: "closeTab"});
     }
 })
 
+chrome.storage.local.get("switcher", v => v.switcher? script(): false);
 
 const script = () => {
 
@@ -42,12 +44,7 @@ const script = () => {
     const regexId = /=\w{5,7}-\w{1,5}/;
     const sendButton = document.querySelector("input[name='sendmailsub']");
 
-    const closeOnMaxOrError = () => {
-        const p = document.querySelector("p");
-        if(!!p && p.innerText.indexOf("to maximum quantity")>-1){ 
-            chrome.storage.local.set({sended: true});
-        }  else {chrome.runtime.sendMessage({method:"closeTab"});}
-    }
+    const delay = async (ms) => await new Promise(resolve => setTimeout(resolve, ms));
  
     const insertGirlId = () => {
         document.location.href = `http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${data.wId}&Submit=Continue+%3E%3E`;
@@ -147,77 +144,84 @@ const script = () => {
         }
     }
 
-    const checkSentMail = async (search10) => {
-        let check = 0;
-        await chrome.storage.local.get("data", v => data = v.data);
+    const checkSentMail = (search10) => {
+        let res;
+        chrome.storage.local.get("data", v => {
+            console.log(v.data)
+            res = doCheckMails(v.data)
+        });
 
-        await chrome.storage.local.get("data", v => console.log(v.data));
-
-        if(data.points.length > 2){
-            if(Array.isArray(data.points[0])){
-                if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0][0] && +search10.children[1].innerHTML <= data.points[0][1])) {
-                    check++;
-                }
-            } else if(data.points[0]==-1){
-                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML >= 0){
-                    check++
-                }
-            } else {
-                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points[0]){
-                    check++
-                }
-            }
-
-            for(let i = 1; i<7; i++){
-                if(Array.isArray(data.points[i])){
-                    if(+search10.children[i+1].innerHTML >= data.points[i][0] && +search10.children[i+1].innerHTML <= data.points[i][1]) {
+        const doCheckMails = (data) => {
+            let check = 0;
+            console.log(data);
+            if(data.points.length > 2){
+                if(Array.isArray(data.points[0])){
+                    if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0][0] && +search10.children[1].innerHTML <= data.points[0][1])) {
                         check++;
                     }
-                } else if(data.points[i]==-1){
-                    if(+search10.children[i+1].innerHTML >= 0){
+                } else if(data.points[0]==-1){
+                    if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML >= 0){
                         check++
                     }
                 } else {
-                    if(+search10.children[i+1].innerHTML <= data.points[i]){
+                    if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points[0]){
+                        check++
+                    }
+                }
+    
+                for(let i = 1; i<7; i++){
+                    if(Array.isArray(data.points[i])){
+                        if(+search10.children[i+1].innerHTML >= data.points[i][0] && +search10.children[i+1].innerHTML <= data.points[i][1]) {
+                            check++;
+                        }
+                    } else if(data.points[i]==-1){
+                        if(+search10.children[i+1].innerHTML >= 0){
+                            check++
+                        }
+                    } else {
+                        if(+search10.children[i+1].innerHTML <= data.points[i]){
+                            check++
+                        }
+                    }
+                }
+            } else if(data.points.length == 2){
+                if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1])) {
+                    check++;
+                } 
+                for(let i = 1; i<7; i++){
+                    if(+search10.children[i+1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1]) {
+                        check++;
+                    }  
+                }
+            } else{
+                console.log("w0rk here");
+                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points){
+                    console.log("w0rk here1");
+                    check++
+                }
+    
+                for(let i = 1; i<7; i++){
+                    console.log("w0rk here" + i);
+                    if(+search10.children[1].innerHTML <= data.points){
                         check++
                     }
                 }
             }
-        } else if(data.points.length == 2){
-            if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1])) {
-                check++;
-            } 
-            for(let i = 1; i<7; i++){
-                if(+search10.children[i+1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1]) {
-                    check++;
-                }  
-            }
-        } else{
-            if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points){
-                check++
-            }
 
-            for(let i = 1; i<7; i++){
-                if(+search10.children[1].innerHTML <= data.points){
-                    check++
-                }
-            }
-        }
-        console.log(check);
-        if(check===7){
-            changeTypeOfLetter();
-        } else {port.postMessage({method:"closeTab"})}
+            console.log(check);
+            if(check===7){
+                changeTypeOfLetter();
+            } else {port.postMessage({method:"closeTab"})}
+        }        
+
     }
+    
 
     const sendAdmire = () => {   
         document.querySelectorAll("input[name='sendmailsub']")[0].click();
     }
 
     switch(pathname){
-        case "/clagt/admire/adr_error.php":
-            closeOnMaxOrError();
-            break;
-
         case "/clagt/woman/women_profiles_allow_edit.php":
             insertGirlId();
             break;
@@ -228,16 +232,28 @@ const script = () => {
             }
             break;
 
-        case "/clagt/admire/search_matches3.php" :
-            chrome.storage.local.get("sended", v => {
-                if(v.sended) {
-                    chrome.storage.local.set({switcher: false});
-                    port.postMessage({method: "closeTabs"})
+        case "/clagt/admire/search_matches3.php" : {
+            chrome.storage.local.get("allMessagesSended", v => {
+                if(v.allMessagesSended){
+                    port.postMessage({method: "reloadThisTab"});
                 } else {
                     openAllMen();
-                    delay(data.turbo?10000:25000).then(() => switchPage());
+                    port.postMessage({method: "closeTabs"});
+                    chrome.storage.local.get("turbo", v => {
+                        if(v.turbo){
+                            setTimeout(() => {
+                                switchPage();
+                            }, 8000)
+                        } else {
+                            setTimeout(() => {
+                                switchPage();
+                            }, 22000)
+                        }
+                    })
                 }
             })
+            break;
+        }
     }
 
     if(!!sendButton){

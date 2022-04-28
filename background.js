@@ -2,6 +2,8 @@
 let isOn;
 let data;
 let dataForSend = {};
+let tabsId = [];
+let womenIdArray;
 
 chrome.storage.local.get(console.log)
 
@@ -71,46 +73,101 @@ const processingAdmireInput = () => {
     } else {
         admArr = data.admire_input;
     }
-    console.log(admArr);
     dataForSend.admire = admArr;
 }
 
-chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+const processingId = () => {
+    womenIdArray = data.w_id_i.split(",");
+    dataForSend.wId = womenIdArray[0];
+}
 
+chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
+let reloaded = false;
     if(request.method == "sendData"){
         data = request.data;
         processingDays();
         processingAdmireInput();
-        dataForSend.wId = data.w_id_i;
-        chrome.storage.local.set({data: dataForSend})
-        chrome.tabs.create({url:`http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${data.w_id_i}&Submit=Continue+%3E%3E`});
+        processingId();
+        chrome.storage.local.set({data: dataForSend});
+        chrome.tabs.query({groupId: -1}, v => {
+            v.forEach(item => {
+                if( item.title.indexOf("www.charmdate.com/clagt/admire/search_matches3.php?womanid=") > -1){
+                    chrome.tabs.reload(item.id);
+                    reloaded=true;
+                } 
+            })
+        })
+        setTimeout(() => {
+            if(!reloaded){chrome.tabs.create({url:`http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${womenIdArray[0]}&Submit=Continue+%3E%3E`});}
+        }, 1000);
     }
-
-    
 });
-
 
 const generalFunc = (p) => {
     if(p.name == "contentChannel") {
 
         p.onMessage.addListener(msg => {
-            chrome.storage.local.get("switcher", d => isOn=d.switcher);
-            console.log(msg);
-            if (isOn) {
 
-                msg.method == "requestData"? p.postMessage({method: "data", data: dataForSend}) : false;
+            chrome.storage.local.get("switcher", d => isOn=d.switcher);
+
+            if (isOn) {
 
                 msg.method == "closeTab" && chrome.tabs.remove(p.sender.tab.id);
 
-                msg.method == "openTab" && chrome.tabs.create({url: msg.url, active:false});
+                msg.method == "openTab" && chrome.tabs.create({url: msg.url, active:false}, v => tabsId.push(v.id));
+
+                msg.method == "closeTabs" && chrome.tabs.remove(tabsId);
+
+                if (msg.method == "reloadThisTab") {
+                    chrome.tabs.reload(p.sender.tab.id);
+                    chrome.storage.local.get("allMessagesSended", v => {
+                        if (womenIdArray.length>0 && v.allMessagesSended){
+                            chrome.storage.local.set({allMessagesSended: false})
+                        }
+                    })
+                    
+                } 
+
             }
         })
     }
+
+    chrome.storage.onChanged.addListener((ch, na) => {
+        if(ch?.allMessagesSended?.newValue == true){
+            console.log("its work")
+            if(womenIdArray.length > 1){
+                chrome.tabs.query({groupId: -1}, v => {
+                    v.forEach(item => {item.url.indexOf(womenIdArray[0] && chrome.tabs.remove(item.id))})
+                })
+                womenIdArray.shift();
+                dataForSend.wId = womenIdArray[0];
+                chrome.storage.local.set({data: dataForSend});
+                chrome.storage.local.set({allMessagesSended: false})
+                chrome.tabs.query({groupId: -1}, v => {
+                    v.forEach(item => {
+                        if( item.title.indexOf("www.charmdate.com/clagt/admire/search_matches3.php?womanid=") > -1){
+                            chrome.tabs.reload(item.id)
+                        } 
+                    })
+                })
+                chrome.tabs.create({url:`http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${womenIdArray[0]}&Submit=Continue+%3E%3E`})
+            } else { 
+                chrome.storage.local.get("allMessagesSended", v => {
+                    if(v.allMessagesSended && womenIdArray.length < 1){
+                        console.log("vam")
+                        chrome.storage.local.set({end: true});
+                        chrome.storage.local.set({switcher: false});
+                    }
+                })
+
+            }
+        }
+    });
 }
+
+
 
 chrome.runtime.onConnect.addListener(p => generalFunc(p))
 
-
-// arr.forEach(item => chrome.tabs.remove({tabId: item}))
 
 
