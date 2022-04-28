@@ -92,9 +92,6 @@ let reloaded = false;
                 if( item.title.indexOf("www.charmdate.com/clagt/admire/search_matches3.php?womanid=") > -1 && item.title.indexOf(womenIdArray[0])){
                     chrome.tabs.reload(item.id);
                     reloaded=true;
-                } else {
-                    chrome.tabs.create({url:`http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${womenIdArray[0]}&Submit=Continue+%3E%3E`})
-                    chrome.tabs.remove(item.id)
                 }
             })
         })
