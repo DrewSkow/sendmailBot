@@ -20,7 +20,7 @@ chrome.storage.local.get("turbo", d => turbo.checked = d.turbo);
 
 const sendButton = document.getElementById("sendButton");
 sendButton.addEventListener('click', e => {
-    chrome.storage.local.set({allMessagesSended: false, end: false});
+    chrome.storage.local.set({allMessagesSended: false, end: false, ended: false});
     const data = {};
     inputArray.forEach(item => {
         if(item.id == "switchButton" || item.id == "turboButton"){data[item.id] = item.checked;}

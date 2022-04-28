@@ -5,8 +5,6 @@ let dataForSend = {};
 let tabsId = [];
 let womenIdArray;
 
-chrome.storage.local.get(console.log)
-
 const arrOfPagesId = [];
 const urls = [
     "http://www.charmdate.com/clagt/admire/adr_error.php",
@@ -91,10 +89,13 @@ let reloaded = false;
         chrome.storage.local.set({data: dataForSend});
         chrome.tabs.query({groupId: -1}, v => {
             v.forEach(item => {
-                if( item.title.indexOf("www.charmdate.com/clagt/admire/search_matches3.php?womanid=") > -1){
+                if( item.title.indexOf("www.charmdate.com/clagt/admire/search_matches3.php?womanid=") > -1 && item.title.indexOf(womenIdArray[0])){
                     chrome.tabs.reload(item.id);
                     reloaded=true;
-                } 
+                } else {
+                    chrome.tabs.create({url:`http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${womenIdArray[0]}&Submit=Continue+%3E%3E`})
+                    chrome.tabs.remove(item.id)
+                }
             })
         })
         setTimeout(() => {
@@ -134,15 +135,13 @@ const generalFunc = (p) => {
 
     chrome.storage.onChanged.addListener((ch, na) => {
         if(ch?.allMessagesSended?.newValue == true){
-            console.log("its work")
             if(womenIdArray.length > 1){
                 chrome.tabs.query({groupId: -1}, v => {
                     v.forEach(item => {item.url.indexOf(womenIdArray[0] && chrome.tabs.remove(item.id))})
                 })
                 womenIdArray.shift();
                 dataForSend.wId = womenIdArray[0];
-                chrome.storage.local.set({data: dataForSend});
-                chrome.storage.local.set({allMessagesSended: false})
+                chrome.storage.local.set({ended: false, data: dataForSend, allMessagesSended: false })
                 chrome.tabs.query({groupId: -1}, v => {
                     v.forEach(item => {
                         if( item.title.indexOf("www.charmdate.com/clagt/admire/search_matches3.php?womanid=") > -1){
@@ -154,7 +153,6 @@ const generalFunc = (p) => {
             } else { 
                 chrome.storage.local.get("allMessagesSended", v => {
                     if(v.allMessagesSended && womenIdArray.length < 1){
-                        console.log("vam")
                         chrome.storage.local.set({end: true});
                         chrome.storage.local.set({switcher: false});
                     }
@@ -164,8 +162,6 @@ const generalFunc = (p) => {
         }
     });
 }
-
-
 
 chrome.runtime.onConnect.addListener(p => generalFunc(p))
 

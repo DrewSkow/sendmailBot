@@ -11,8 +11,6 @@ chrome.storage.local.get("switcher", v => {
     if(v.switcher){
         locationsErr.forEach(item => {
             if(document.location.href == item) {
-                console.log("aaaaaaa")
-
                 const p = document.querySelector("p");
                 if(!!p && p.innerText.indexOf("to maximum quantity") > -1){ 
                     chrome.storage.local.set({allMessagesSended: true})
@@ -22,9 +20,8 @@ chrome.storage.local.get("switcher", v => {
             }
         });
         
-        chrome.storage.local.get("end", v => v.end && alert("вам конец"))
+        chrome.storage.local.get("end", v => v.end && alert("Всё отправлено"))
         
-        chrome.storage.local.get(console.log);
         
         chrome.storage.local.get("data", v => data = v.data);
 
@@ -93,17 +90,19 @@ const script = () => {
         const nextButton = document.querySelectorAll("table")[25].children[0].children[0].children[1].children[3];
         const firstButton = document.querySelectorAll("table")[25].children[0].children[0].children[1].children[1];
         if(!nextButton.children[0]){
-            localStorage.setItem("ended", "true");
+            chrome.storage.local.set({ended: true})
         };
-        if(!!localStorage.getItem("ended")) {
-            if(!!firstButton.children[0]){
-                firstButton.click();
-            } else{
-                document.location.reload();
+        chrome.storage.local.get("ended", v => {
+            if(v.ended) {
+                if(!!firstButton.children[0]){
+                    firstButton.click();
+                } else{
+                    document.location.reload();
+                }
+            } else {
+                nextButton.click();
             }
-        } else {
-            nextButton.click();
-        }
+        })
     }
 
     function getRandomInRange(min, max) {
@@ -147,13 +146,11 @@ const script = () => {
     const checkSentMail = (search10) => {
         let res;
         chrome.storage.local.get("data", v => {
-            console.log(v.data)
             res = doCheckMails(v.data)
         });
 
         const doCheckMails = (data) => {
             let check = 0;
-            console.log(data);
             if(data.points.length > 2){
                 if(Array.isArray(data.points[0])){
                     if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0][0] && +search10.children[1].innerHTML <= data.points[0][1])) {
@@ -194,21 +191,17 @@ const script = () => {
                     }  
                 }
             } else{
-                console.log("w0rk here");
                 if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points){
-                    console.log("w0rk here1");
                     check++
                 }
     
                 for(let i = 1; i<7; i++){
-                    console.log("w0rk here" + i);
                     if(+search10.children[1].innerHTML <= data.points){
                         check++
                     }
                 }
             }
 
-            console.log(check);
             if(check===7){
                 changeTypeOfLetter();
             } else {port.postMessage({method:"closeTab"})}
