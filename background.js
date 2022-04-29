@@ -114,14 +114,17 @@ const generalFunc = (p) => {
 
                 msg.method == "openTab" && chrome.tabs.create({url: msg.url, active:false}, v => tabsId.push(v.id));
 
-                msg.method == "closeTabs" && chrome.tabs.remove(tabsId);
+                if (msg.method == "closeTabs"){
+                    chrome.tabs.remove(tabsId);
+                    tabsId = [];
+                };
 
                 if (msg.method == "reloadThisTab") {
                     chrome.tabs.reload(p.sender.tab.id);
                     chrome.storage.local.get("allMessagesSended", v => {
                         if (womenIdArray.length>0 && v.allMessagesSended){
                             chrome.storage.local.set({allMessagesSended: false})
-                            
+
                         } else if(womenIdArray.length == 0 && v.allMessagesSended){
                             chrome.storage.local.set({end: true, allMessagesSended: false})
                         }
@@ -150,9 +153,10 @@ const generalFunc = (p) => {
                     })
                 })
                 chrome.tabs.create({url:`http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${womenIdArray[0]}&Submit=Continue+%3E%3E`})
-            } else { 
+            } else if(womenIdArray.length <= 1){ 
                 chrome.storage.local.get("allMessagesSended", v => {
-                    if(v.allMessagesSended && womenIdArray.length < 1){
+                    if(v.allMessagesSended && womenIdArray.length <= 1){
+                        chrome.tabs.remove(tabsId);
                         chrome.storage.local.set({end: true});
                         chrome.storage.local.set({switcher: false});
                     }

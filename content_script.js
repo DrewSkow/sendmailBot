@@ -40,8 +40,6 @@ const script = () => {
     const regexM = /=\w{7,10}/;
     const regexId = /=\w{5,7}-\w{1,5}/;
     const sendButton = document.querySelector("input[name='sendmailsub']");
-
-    const delay = async (ms) => await new Promise(resolve => setTimeout(resolve, ms));
  
     const insertGirlId = () => {
         document.location.href = `http://www.charmdate.com/clagt/admire/search_matches2.php?womanid=${data.wId}&Submit=Continue+%3E%3E`;
