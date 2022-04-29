@@ -121,6 +121,9 @@ const generalFunc = (p) => {
                     chrome.storage.local.get("allMessagesSended", v => {
                         if (womenIdArray.length>0 && v.allMessagesSended){
                             chrome.storage.local.set({allMessagesSended: false})
+                            
+                        } else if(womenIdArray.length == 0 && v.allMessagesSended){
+                            chrome.storage.local.set({end: true, allMessagesSended: false})
                         }
                     })
                     
