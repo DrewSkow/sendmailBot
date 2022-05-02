@@ -7,7 +7,7 @@ const locationsErr = [
 const port = chrome.runtime.connect({name: "contentChannel"});
 let data;
 
-chrome.storage.local.get("switcher", v => {
+chrome.storage.local.get(["switcher"], v => {
     if(v.switcher){
         locationsErr.forEach(item => {
             if(document.location.href == item) {
@@ -19,17 +19,15 @@ chrome.storage.local.get("switcher", v => {
                     port.postMessage({method:"closeTab"});}
             }
         });
-        
-        chrome.storage.local.get("end", v => v.end && alert("Всё отправлено"))
-        
-        
+
+        document.getElementsByTagName("h3")[0]?.innerHTML.indexOf("submitted successfully") > 0 && port.postMessage({method: "closeTab"});     
+    
         chrome.storage.local.get("data", v => data = v.data);
 
-        document.getElementsByTagName("h3")[0]?.innerHTML.indexOf("submitted successfully") > 0 && port.postMessage({method: "closeTab"});
+        script();
+
     }
 })
-
-chrome.storage.local.get("switcher", v => v.switcher? script(): false);
 
 const script = () => {
 
@@ -76,7 +74,7 @@ const script = () => {
                         port.postMessage({method: "openTab", url:`http://www.charmdate.com/clagt/admire/${ref[0]}`});
                         if(i===quantity-1){clearInterval(loop)}
                         i++;
-                    }, 1000);
+                    }, 2000);
                 }
             })
         } else{
@@ -141,60 +139,51 @@ const script = () => {
         }
     }
 
-    const checkSentMail = (search10) => {
-        let res;
+    const doCheckMails = (search10) => {
+        let check = 0;
         chrome.storage.local.get("data", v => {
-            res = doCheckMails(v.data)
-        });
-
-        const doCheckMails = (data) => {
-            let check = 0;
-            if(data.points.length > 2){
-                if(Array.isArray(data.points[0])){
-                    if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0][0] && +search10.children[1].innerHTML <= data.points[0][1])) {
+            if(v.data.points.length > 2){
+                if(Array.isArray(v.data.points[0])){
+                    if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= v.data.points[0][0] && +search10.children[1].innerHTML <= v.data.points[0][1])) {
                         check++;
                     }
-                } else if(data.points[0]==-1){
-                    if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML >= 0){
+                } else if(v.data.points[0]==-1){
                         check++
-                    }
                 } else {
-                    if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points[0]){
+                    if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= v.data.points[0]){
                         check++
                     }
                 }
     
                 for(let i = 1; i<7; i++){
-                    if(Array.isArray(data.points[i])){
-                        if(+search10.children[i+1].innerHTML >= data.points[i][0] && +search10.children[i+1].innerHTML <= data.points[i][1]) {
+                    if(Array.isArray(v.data.points[i])){
+                        if(+search10.children[i+1].innerHTML >= v.data.points[i][0] && +search10.children[i+1].innerHTML <= v.data.points[i][1]) {
                             check++;
                         }
-                    } else if(data.points[i]==-1){
-                        if(+search10.children[i+1].innerHTML >= 0){
+                    } else if(v.data.points[i]==-1){
                             check++
-                        }
                     } else {
-                        if(+search10.children[i+1].innerHTML <= data.points[i]){
+                        if(+search10.children[i+1].innerHTML <= v.data.points[i]){
                             check++
                         }
                     }
                 }
-            } else if(data.points.length == 2){
-                if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1])) {
+            } else if(v.data.points.length == 2){
+                if(search10.children[1].innerHTML === "-" || (+search10.children[1].innerHTML >= v.data.points[0] && +search10.children[1].innerHTML <= v.data.points[1])) {
                     check++;
                 } 
                 for(let i = 1; i<7; i++){
-                    if(+search10.children[i+1].innerHTML >= data.points[0] && +search10.children[1].innerHTML <= data.points[1]) {
+                    if(+search10.children[i+1].innerHTML >= v.data.points[0] && +search10.children[1].innerHTML <= v.data.points[1]) {
                         check++;
                     }  
                 }
             } else{
-                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= data.points){
+                if(search10.children[1].innerHTML === "-" ||  +search10.children[1].innerHTML <= v.data.points){
                     check++
                 }
     
                 for(let i = 1; i<7; i++){
-                    if(+search10.children[1].innerHTML <= data.points){
+                    if(+search10.children[1].innerHTML <= v.data.points){
                         check++
                     }
                 }
@@ -203,8 +192,10 @@ const script = () => {
             if(check===7){
                 changeTypeOfLetter();
             } else {port.postMessage({method:"closeTab"})}
-        }        
-
+        }) 
+    }        
+    const checkSentMail = (search10) => {
+       doCheckMails(search10);
     }
     
 
@@ -238,7 +229,7 @@ const script = () => {
                         } else {
                             setTimeout(() => {
                                 switchPage();
-                            }, 22000)
+                            }, 40000)
                         }
                     })
                 }

@@ -110,7 +110,10 @@ const generalFunc = (p) => {
 
             if (isOn) {
 
-                msg.method == "closeTab" && chrome.tabs.remove(p.sender.tab.id);
+               if (msg.method == "closeTab") {
+                    chrome.tabs.remove(p.sender.tab.id);
+                    tabsId.splice(tabsId.indexOf(p.sender.tab.id), 1);
+               }
 
                 msg.method == "openTab" && chrome.tabs.create({url: msg.url, active:false}, v => tabsId.push(v.id));
 
