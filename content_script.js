@@ -25,7 +25,6 @@ chrome.storage.local.get(["switcher"], v => {
         chrome.storage.local.get("data", v => data = v.data);
 
         script();
-
     }
 })
 
@@ -122,7 +121,7 @@ const script = () => {
                 for(let i = 2; i < quantity; i++){
                     if (document.getElementsByClassName("mobanva")[0].children[i].children[2].innerHTML == data.admire){
                      randomChildren = document.getElementsByClassName("mobanva")[0].children[i];
-                    }
+                    } 
                  }
             } else if(Array.isArray(data.admire)) {
                 if(data.admire[data.admire.length-1] == ","){

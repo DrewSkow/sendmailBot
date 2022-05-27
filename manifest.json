@@ -13,7 +13,11 @@
     ],
     "action" : {
         "default_title" : "SendBot",
-        "default_icon" : "icon.png",
+        "default_icon": {           
+            "16": "icon.png",
+            "48": "icon.png",
+           "128": "icon.png"
+          },
         "default_popup": "popup.html"
     },
 
